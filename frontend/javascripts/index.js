@@ -1,10 +1,53 @@
 const BASE_URL = "http://localhost:3000";
 
 document.addEventListener('DOMContentLoaded', function () {
+  grabSortElement();
   document.querySelector('form').addEventListener('submit', createQuestion); 
   loadQuestions();
   //loadAnswers();
 });
+
+
+
+function grabSortElement(){
+  let button = document.getElementById('sort');
+  button.addEventListener('click', sortySort);
+}
+
+function theSort(data){
+  let sortedData = data.sort(function(a,b) {
+    let questionA = a.question.toUpperCase();
+    let questionB = b.question.toUpperCase();
+    if (questionA < questionB) {
+      return -1;
+    }
+    if (questionA > questionB) {
+      return 1;
+    }
+    return 0
+  })
+  let ul = document.getElementById('questions');
+  while (ul.hasChildNodes()) { ul.removeChild(ul.firstChild) }
+  //instead of console logging, render sorted data on page
+  sortedData.forEach(element => {
+    helper(element)
+  })
+}
+
+function sortySort(){
+  // fetch data for theSort()
+  fetch(BASE_URL + '/questions')
+  .then(response => {
+    if (response.status != 200) {
+      throw new Error(response.statusText);
+    } else {
+      response.json() 
+      .then(data => {
+        theSort(data)
+      })
+    }
+  })
+}
 
 function createQuestion(e) {
   e.preventDefault();
