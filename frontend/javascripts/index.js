@@ -3,18 +3,18 @@ const BASE_URL = "http://localhost:3000";
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelector('form').addEventListener('submit', createQuestion); 
   loadQuestions();
-  loadAnswers();
-})
+  //loadAnswers();
+});
 
 function createQuestion(e) {
   e.preventDefault();
-  let ul = document.getElementById('questions')
+  let ul = document.getElementById('questions');
   let q = document.getElementById('question').value;
   let params = {
     question: {
      question: q
     }
-  }
+  };
 
   fetch(BASE_URL + '/questions', {
     method: 'POST',
@@ -26,10 +26,25 @@ function createQuestion(e) {
   })
     .then(resp => resp.json())
     .then(question => {
-      ul.innerHTML += `<li>${question.question}</li>`
-    createAnswer(question)
-    })
-}
+      helper(question);
+      // ul.innerHTML += `<li>${question.question}</li>`
+    createAnswer(question);
+    });
+};
+
+function helper(question){
+  let ul = document.getElementById('questions');
+  let li = document.createElement('li');
+  let a = document.createElement('a');
+  a.setAttribute('href', '#');
+  a.textContent = question.question;
+  a.addEventListener('click', function (e) {
+    e.preventDefault();
+    clickHandler(question);
+  })
+  ul.appendChild(li);
+  li.appendChild(a);
+};
 
 function createAnswer(question) {
   let ul = document.getElementById('answers')
@@ -67,17 +82,36 @@ function loadQuestions() {
       }
     })
     .then(questions => {
-      questions.forEach(function (question) {
-        ul.innerHTML += `<li>${question.question}</li>`
-        
+      var uniqQuestions = [...new Set(questions)]
+      uniqQuestions.forEach(function (q) {
+      // questions.forEach(function (q) {
+        helper(q)
+        // ul.innerHTML += `<li><a href='#' >${question.question}</a></li>`
+        // let li = document.createElement('li');
+        // let a = document.createElement('a');
+        // a.setAttribute('href', '#');
+        // a.textContent = question.question;
+        // a.addEventListener('click', function(e) {
+        //   e.preventDefault();
+        //   clickHandler(question)
+        // })
+        // ul.appendChild(li)
+        // li.appendChild(a);
       })
       
     })
     .catch(errors => console.log(errors))
+
+    
 }
 
-function loadAnswers() {
+function clickHandler(question){
+  loadAnswers(question)
+}
+
+function loadAnswers(question) {
   let ul = document.getElementById('answers');
+  while (ul.hasChildNodes()) {ul.removeChild(ul.firstChild)}
   fetch(BASE_URL + "/answers")
     .then(response => {
       if (response.status != 200) {
@@ -88,10 +122,10 @@ function loadAnswers() {
     })
     .then(answers => {
       answers.forEach(function (answer) {
-        ul.innerHTML += `<li>${answer.answer}</li>`
-
+        if (answer.question_id == question.id){
+          ul.innerHTML += `<li>${answer.answer}</li>`
+        }
       })
-
     })
     .catch(errors => console.log(errors))
 }

@@ -15,13 +15,20 @@ class QuestionsController < ApplicationController
 
   # POST /questions
   def create
-    @question = Question.new(question_params)
 
+    @question = Question.find_or_create_by(question_params) 
     if @question.save
       render json: @question, status: :created, location: @question
     else
       render json: @question.errors, status: :unprocessable_entity
     end
+    # @question = Question.new(question_params)
+
+    # if @question.save
+    #   render json: @question, status: :created, location: @question
+    # else
+    #   render json: @question.errors, status: :unprocessable_entity
+    # end
   end
 
   # PATCH/PUT /questions/1
